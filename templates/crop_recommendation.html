@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon_io/favicon.ico') }}">
+
+    <title>Crop Recommendation</title>
+    <style>
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-logo-img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .navbar-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+        }
+
+        .navbar-links {
+            display: flex;
+        }
+
+        .navbar-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-links a:hover {
+            color: #3498db;
+        }
+
+        :root {
+            --primary-color: #4caf50;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --input-bg-color: #ffffff;
+            --input-border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            text-align: center;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Style for the weather card */
+        #weather-card {
+            display: flex;
+            align-items: center;
+            background-color: #e0f7fa;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        #weather-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 20px;
+        }
+
+        #weather-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #weather-card h2 {
+            color: #0077cc;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #weather-card p {
+            font-size: 16px;
+            margin: 5px 0;
+            color: #005f99;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            /* Adjust based on screen size */
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--input-border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .input-group img {
+            max-width: 40px;
+            margin-bottom: 10px;
+
+        }
+
+        .input-group:hover {
+            box-shadow: 0 0 30px rgba(43, 127, 46, 0.353);
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--input-border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .info {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        button {
+            grid-column: 1 / -1;
+            /* Spans across all columns */
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+
+        .crop-image {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-content {
+            text-align: left;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .crop-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            margin: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 5px;
+        }
+
+        .footer-section ul li a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .footer-section ul li a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            margin-top: 20px;
+            border-top: 1px solid #555;
+            padding-top: 10px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .input-group img {
+                width: 30px;
+                height: 30px;
+            }
+
+            #weather-card {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #weather-card img {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .result-card {
+                padding: 1rem;
+            }
+
+            .result-content {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <img src="/static/images/logo.png" alt="Logo">
+                <div class="navbar-logo">FarmsSphere</div>
+            </div>
+            <div class="navbar-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <header>
+            <h1>CROP RECOMMENDATION</h1>
+        </header>
+        <div id="weather-card">
+            <h2>Weather in your city</h2>
+            <img src="/static/images/weathericon.png" alt="Weather">
+            <div class="weather-content">
+                <div class="weather-info">
+                    <div class="weather-icon">🌤️</div>
+                    <p><strong>City:</strong> <span id="city">Loading...</span></p>
+                    <p><strong>Temperature:</strong> <span id="temperature">--</span>°C</p>
+                    <p><strong>Weather:</strong> <span id="description">--</span></p>
+                    <p><strong>Humidity:</strong> <span id="humidity">--</span>%</p>
+                    <p><strong>Wind Speed:</strong> <span id="wind_speed">--</span> m/s</p>
+                </div>
+            </div>
+        </div>
+        <div>
+
+            <form action="/predict" method="post">
+                <!-- edited -->
+                <!-- edited -->
+                <div class="input-group">
+                    <!-- <img src="" alt="Nitrogen icon"> -->
+                    <img src="data:image/png;base64,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"
+                        alt="Nitrogen icon">
+                    <label for="N">Nitrogen (N):</label>
+                    <input type="number" id="N" name="N" min="0" max="100" placeholder="0 - 100" required>
+                    <p class="info">Measures the nitrogen content in soil.</p>
+                </div>
+
+                <div class="input-group">
+                    <img src="data:image/png;base64,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"
+                        alt="Phosphorus icon">
+                    <label for="P">Phosphorus (P):</label>
+                    <input type="number" id="P" name="P" min="0" max="100" placeholder="0 - 100" required>
+                    <p class="info">Indicates phosphorus levels in soil.</p>
+                </div>
+
+                <div class="input-group">
+                    <!-- <img src="potassium.png" alt="Potassium icon"> -->
+                    <img
+                        src="data:image/png;base64,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">
+                    <label for="K">Potassium (K):</label>
+                    <input type="number" id="K" name="K" min="0" max="100" placeholder="0 - 100" required>
+                    <p class="info">Shows potassium concentration in soil.</p>
+                </div>
+
+                <div class="input-group">
+                    <!-- <img src="/api/placeholder/40/40" alt="Temperature icon"> -->
+                    <img
+                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC90lEQVR4nO1aS2sUQRDui6gQVNCDGsWgIrmv2exUzXQlUTRoxIsI6kGvPsD3Ub1J3KpNCEQwiuQmwdcpehTRf+BB8GgQctBDooeoMSo1DwQx7mbTOzvZ7AcNA139ddVMff0cY2qAoFTIW8ZRYnxjBae0hM+Mo5a9DrMUYBmuE+NPEvz1zxLVXTNZRlcRDquzVmCWGIa7xc/RIK0LywDsJoHbYZ3aMB4yWYVleBm9eTg9v41/Jv4yL0xWQYzT6mR+KL9mPpu9/bm10VfDKZNVUKwDV3Z1QzOQrIEaLbWoimIZXptGCIQEX5msoOFSyziyWzKBZF4jpkK7pkZqjWWlkd6h3pUNoZHcSG5FUyNpoakRaWqkNlhWqdUwgfQ255GUsOdmx/qFppa2MVlCl3j7rcBkfDj3vpw9MUzEJ5KTQRH2mSyABE4lx6Ak8CSQYGu5NmpDAk+T49WA8aSpJ0j8PsvwIzyYLuKFBbdnuKhtNRhbggOmHggGgk1W8FN8/Hm+Wp4wmGhm/0hF2ujWy8ocuB+fqj9eNFeSZoz3TJrQHA/TQWCmm71ti+Wjwc42y/CVGL/DLdjsxstKOma4GqfDA3ecOBaL/5IrzvKdCjyP7ji8I644LePRWG/jrjgr6fRDGMhgZ5srTn/A3x69HJgwaUG1EXZ6g1a54iyUCqvj1JoxaYEEP4eBDFOLK0695aLoSm7apAVieKed+uLvcsYpXnscyFtXnJWLXfxjrjgDgROpiz0QPBu/vTFXnMTwsNyNsHNQf35LvFD8pqPNovlKhZ3KZQVme0qFVpMmrOBd10sUYrhj0oYuJZLRyzJerpaHBK8k9+5Uj0WjQn/DIME5XcpXE4wGEW4DBOe62DtYGy8rdYbxnDqSbKy6i7CjMk3E6SQ4p4OHyQJI/L7k9w0VrY5AtojHw7lhmFrCIl67DrFW8JGucpN0qvuX+BsktIEEh/5se/9zFR3awIhuzkxW0VMqtOpcQIzPdJa2DF+0hM+C41pXiyH2NxsMoDn/VwEGAAAAAElFTkSuQmCC">
+                    <label for="temperature">Temperature (°C):</label>
+                    <input type="number" id="temperature" name="temperature" min="-20" max="50"
+                        placeholder="-20°C to 50°C" required>
+                    <p class="info">Average temperature in Celsius.</p>
+                </div>
+
+                <div class="input-group">
+                    <!-- <img src="/api/placeholder/40/40" alt="Humidity icon"> -->
+                    <img
+                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAAC90lEQVR4nO1aS2sUQRDui6gQVNCDGsWgIrmv2exUzXQlUTRoxIsI6kGvPsD3Ub1J3KpNCEQwiuQmwdcpehTRf+BB8GgQctBDooeoMSo1DwQx7mbTOzvZ7AcNA139ddVMff0cY2qAoFTIW8ZRYnxjBae0hM+Mo5a9DrMUYBmuE+NPEvz1zxLVXTNZRlcRDquzVmCWGIa7xc/RIK0LywDsJoHbYZ3aMB4yWYVleBm9eTg9v41/Jv4yL0xWQYzT6mR+KL9mPpu9/bm10VfDKZNVUKwDV3Z1QzOQrIEaLbWoimIZXptGCIQEX5msoOFSyziyWzKBZF4jpkK7pkZqjWWlkd6h3pUNoZHcSG5FUyNpoakRaWqkNlhWqdUwgfQ255GUsOdmx/qFppa2MVlCl3j7rcBkfDj3vpw9MUzEJ5KTQRH2mSyABE4lx6Ak8CSQYGu5NmpDAk+T49WA8aSpJ0j8PsvwIzyYLuKFBbdnuKhtNRhbggOmHggGgk1W8FN8/Hm+Wp4wmGhm/0hF2ujWy8ocuB+fqj9eNFeSZoz3TJrQHA/TQWCmm71ti+Wjwc42y/CVGL/DLdjsxstKOma4GqfDA3ecOBaL/5IrzvKdCjyP7ji8I644LePRWG/jrjgr6fRDGMhgZ5srTn/A3x69HJgwaUG1EXZ6g1a54iyUCqvj1JoxaYEEP4eBDFOLK0695aLoSm7apAVieKed+uLvcsYpXnscyFtXnJWLXfxjrjgDgROpiz0QPBu/vTFXnMTwsNyNsHNQf35LvFD8pqPNovlKhZ3KZQVme0qFVpMmrOBd10sUYrhj0oYuJZLRyzJerpaHBK8k9+5Uj0WjQn/DIME5XcpXE4wGEW4DBOe62DtYGy8rdYbxnDqSbKy6i7CjMk3E6SQ4p4OHyQJI/L7k9w0VrY5AtojHw7lhmFrCIl67DrFW8JGucpN0qvuX+BsktIEEh/5se/9zFR3awIhuzkxW0VMqtOpcQIzPdJa2DF+0hM+C41pXiyH2NxsMoDn/VwEGAAAAAElFTkSuQmCC">
+                    <label for="humidity">Humidity (%):</label>
+                    <input type="number" id="humidity" name="humidity" min="0" max="100" placeholder="0% - 100%"
+                        required>
+                    <p class="info">Relative humidity percentage.</p>
+                </div>
+
+                <div class="input-group">
+                    <!-- <img src="/api/placeholder/40/40" alt="pH icon"> -->
+                    <img
+                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAG0UlEQVR4nO1baYwURRQu8BbxPqIRNZ4ENYory/arnnq7ygY0eEWJGDVEE41RfyBeaKJr/KG782qWMzEgifGMkCiKoFHwCJ4hCMYjChpvQEXRRQwsophX/Xp2GHenm9menlnYL+lkMlVdr+rVe/WOeq1UP/rRj2rAf9g/BK1eZiwsR4uHq90JDbmG/QzB22j1dn6M1StxCh6sdgfUzarbCy287BZO+kt+gt+whNvULo3tagCSfirYdVjnt/snNmXhJEP6J5GE2WpXhiG434k96Q5jveHh/5m2zDlo9UZhzKQdXtquBhjyb0YLc86bOvIo1VfRmIPLkfS/hmCbycGFxe3GwsVo9T+unfRF/N+4eeP2MBaeCM8KtHoNZuFs1ddgrDfcWNgkO3xXT/2Q9D1yHvyJ7XAuWpgrC2fpWCZq8gdLjOorOP+hEYehhe+ChcDTJTs7cYdnhFF/y+J/ZgZiC+5rCOYHKgS/6FZ9nOoTh56FBbKg5Wz+YplIqz+RdzabLHhhGzMBSb8rjHkPW3BPVcvArJ4oO78hYzND4rzDBx2LuXsvB9cUt/vT/COQ4Htuz1h9i6pVNFm/Dq3uDETWuyLue0g6J5bixZ76NGbhklA96lrq9le1hvpp9QeGDg6br7jvjZk2Zh9D8Dtbi6jTHi18GEgBXKlqDWhhjhxWq5qpeVDc90wOmmT3V0TSIH2r0JinagmY9Ue5HbS6k9VgZ95lEylSY6P6NrXr08VkfqpqBc3UPAgtfB1MzL97Z9/P639WT4zqC20wOPQRVK0ACaaGIlyOiUILrbKoO6L6NuQaDg0dI1ULMLmGMwM3FraxF1fOGEjedSLW8yPpBa4z+wofqFqAIVgiuzet3DE88o40BFscIwuCpWKwdPHC5RC8U1UbjWKXjdW/cqanN2MZApKxvvXJH9atqewKkNbgTDxAVQOjWusOMlYvRIK1oWcW5/CKwrCWYXsbgrdkgZ2BSfWv4gjRWLg3PGSdD0CeUdUAtMHgvAh2pbW+4sknMb4LfKx+xJ0nBTTyT2Bm2Qm6Ogl6O40wq4MWVhvSj8qkfoM2OEYlCNNmTuFdDyJEWMBWptF6ozELNwjNjzngUmkik2uol9N3U1MbnCZprkXCkFlpzCFQE/1jQNMfq9KEsTCj2FtD6w11Ykm6Iyk1iDGPSbIR76RBLw9j4c0gVPXHFDlB7iBksVUpgE9/Vjum2Uj+yDRoOqDVr4voXRr8I7k7yexiruFklRLY5xApmJEWTcU+vuT0P+fcHCcoCtRidZqHUpA3DFJkqWWHmql5kCH4qBvTtLUx56NKGWjhM7ch3WSaKwYjiUvJ1v7FbnAp17UUOMfH12Rlt1s9WSTySZUKWtRAJ3JBquuM3g4XSlC57U05fZaowVqVBjLBLY7z+5PQ994ywG2IhQ3cp4m841WlgQQ3CQNeSGS83jLAmWa9UCRyvKo0jNWzReduL9WvIH8fPhs5znfeY+IMCFNp5YfisYGk3xAJaC7Zr7sgpps7gkQYQPqC8IpdVRqG9DdxHJ7iiWNr/bFhXUBhJrdnRu34lKblDQ2z0Akts2ewv8/EOPdfolu3O8c7Lz5DR5IMCPOD7BqrSsPIpSW7v+UyoDCRmYQKcAAmKrBF1SoDMjYzxBC8IufA3J76RY1TkgEWNqtaUwEseth/4POguF/UOLFS5ATrVaWB4cVHRNjbTazQ4QoeChZf2C9qnFK0OHkqzP1CVRrGwmIXg1tvdKl+cSYep188K+CPFSYvUpWGIT1dJjU5CQZIveDSctt3KL6KcafYayB540XfXkqCAcnMCV5zc8rqyypOLNOeOZqruTgMLnUpkRYD3P0E3yY565RSyS1avTQqL58WAzKkJ4gJXKzSgrH+jaIG7/dGd5NAvlKE9ASVcrHzerEG56sqgdNgsvvr+M4wVeIYpqKsXhnlFVYCXFjN1SESBN2WNn0VFC5KZGj1fWnTNwQPiulbndZlzP/A4u8sAumtXOCkUgLnIsJiDNMGGVVNYL6sBTZwlUil6XESNF9ISfoBVXW0uKTk82GgY8gbUSlSXDYbJkBdRJn2zXBPcDW8XTXBm43V16sKmF52eGTxz1VN7yM+hZlVEP0tSuKe0Lf+qWj1q/lwmvT0alid2EDyrw3FlN1TQ/qxctSCb3yR4PEwAeP8jjTS3kmAK75dbQ/prV0SAat497i2l+uAOYnBYswPf1PgvgngQItgJpu2glxCJ5fL9MlP63DKyBOM1VlXzRUz+VmQOfqBLUzf+DAiAqyzUlozmU9v950gwVr3aQxfsLpKM70CST/rLjm40LJFDYwatx/96IfqLf4DN+64tc6a0GgAAAAASUVORK5CYII=">
+                    <label for="ph">pH:</label>
+                    <input type="number" step="0.01" id="ph" name="ph" min="3.0" max="10.0" placeholder="3.0 - 10.0"
+                        required>
+                    <p class="info">Soil pH level.</p>
+                </div>
+
+                <div class="input-group">
+                    <!-- <img src="/api/placeholder/40/40" alt="Rainfall icon"> -->
+                    <img
+                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAACXBIWXMAAAsTAAALEwEAmpwYAAADOElEQVR4nO2YS2tTQRTHR4turA9EbevahdTXItjmnnMzp6l2oYgoGL+DIvhYuC1SqG3OuWlai+hW66aCX8APoIIovksVBAVB3Ggr2ko1MjeTtAht7m3S5BbvD4ZCmZmc/5xnolRMTExMGNIeHtACfVrgITF8IsZfJPhZMzzQAv0kzm4VZchL7iKBeyRYqLB+E8N4d76zRUUNzXhEC371DWX8Rgx57UE6lUu1JW4m1hmju8Q55P+fYdrs0wxfutjtVJESwTBnRYy5w+72pfaT0DbjEStmOi1uon7WLhFOZU8IXlEh0AxXi2Lw/eGBxGbVSKiUE4xjyzmvBe/a84OqkdWJGP+YnKgUTothzmmB78T4o2O4Y5NqBFqgr/iakK/qHsbrpXuI4YZmeEmCU0agFpwggTua8XR7b/v62lm/0ADTJwQLKXa6q7rHg6MBSnZBC77TWTypao3f7IyQXKqtmnuSXnKrNXRCC1z2Q3aItvRwz4Z0DvdowfPE+HxeFAyoXrW2hkL8jl2ohctJ3GNLGter1pLAGc0wUxazXIqvA0Mmhv0EtS/ksLND1Qli7JoX454Iddi8uBa4Vm56/6yUOKDqiGb3rO0/b83UEEbE/WIMw09TWVJessPEr1lu1t1fbY6EJTOeadKCL4qVzjkV6JDxhC2NH7SX3KciAmXxQuBG7OcEw5zxRJRElGwrVTpVCZPYNqSGVMSAQdhoc3Sq4mYSeFVMKuegWt1CcMrfPErNKmIQO3sDh1aUhWiBSzbsbwUOLVNuVYTImPJbHCyDld9SspPgsIoQxHjOjimTgRpiufwyzJhBTkUA7UGaBGfN9yAtcDz4QcYRm1QfGykmM55psp6YtbnRH+oC47ryiMIw4wvzMFmPAkCj1OxXJ4aL8znhe6J/WWO8P28xjiw2NNZvwWSocFoM+yUnZwa20m9TK7m0+QzG15rxtqlOgSfdmP8JylKrFnhsfshWq1oE4xtbdZ6oglqjVtsL0wIR/t8stVZzX0NeOJSIenusO9/ZUmpOZoSGQdhZj301JRYRFU9QwFj39wo8C5MTle6rKUGMK+9lfKQFn1YrdkUIYlwj74uJiYlRq5q/eTrI4e+mMFQAAAAASUVORK5CYII=">
+                    <label for="rainfall">Rainfall (mm):</label>
+                    <input type="number" id="rainfall" name="rainfall" min="0" max="500" placeholder="0 - 500 mm"
+                        required>
+                    <p class="info">Annual rainfall in millimeters.</p>
+                </div>
+
+                <button type="submit">Get Crop Recommendation</button>
+            </form>
+
+            <div class="result-card" id="result-card">
+                {% if image_url %}
+                <img src="{{ image_url }}" alt="Crop Image" class="crop-image">
+                {% endif %}
+                <div class="result-content">
+                    <h2 class="result-title">Recommended Crop🌾
+                </div>
+                </h2>
+                <!-- <div class="crop-icon">🌾</div> -->
+                <p class="result-description">{{ prediction_text | replace('\n', '<br>') | safe }}</p>
+            </div>
+        </div>
+
+
+
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>FarmsSphere is dedicated to empowering farmers with cutting-edge technology and data-driven insights.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="index.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: farmsphere28@gmail.com</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 FarmsSphere. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const inputGroups = document.querySelectorAll('.input-group');
+            inputGroups.forEach((group, index) => {
+                group.style.animationDelay = `${0.1 * (index + 1)}s`;
+            });
+
+            // Hide result card initially
+            const resultCard = document.getElementById('result-card');
+            resultCard.style.display = 'none';
+
+            // Show the result card after a successful recommendation
+            const predictionText = "{{ prediction_text }}"; // Assuming this value is set by your server-side code
+            if (predictionText.trim()) { // Check if the prediction text is not empty
+                resultCard.style.display = 'block';
+            }
+        });
+
+        // <!-- edited -->
+        // Function to fetch weather using latitude and longitude
+        function fetchWeather(lat, lon) {
+            fetch(`/get_weather_by_location?lat=${lat}&lon=${lon}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("weather-card").innerHTML = "Error fetching weather data.";
+                    } else {
+                        document.getElementById('city').innerText = data.city;
+                        document.getElementById('temperature').innerText = data.temperature;
+                        document.getElementById('description').innerText = data.description;
+                        document.getElementById('humidity').innerText = data.humidity;
+                        document.getElementById('wind_speed').innerText = data.wind_speed;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                });
+        }
+
+        // Function to get the current location of the user
+        function getLocationAndFetchWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    fetchWeather(lat, lon);
+                }, function (error) {
+                    console.log("Geolocation error: ", error);
+                    document.getElementById("weather-card").innerHTML = "Unable to get location.";
+                });
+            } else {
+                document.getElementById("weather-card").innerHTML = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        // Call the function when the page loads
+        window.onload = getLocationAndFetchWeather;
+        // <!-- edited -->
+    </script>
+</body>
+
+</html>

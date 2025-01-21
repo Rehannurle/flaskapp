@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Yield Prediction Tool</title>
+    <style>
+        .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-logo-img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .navbar-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+        }
+
+        .navbar-links {
+            display: flex;
+        }
+
+        .navbar-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-links a:hover {
+            color: #3498db;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23aed581' fill-opacity='0.2'%3E%3Cpath d='M0 0h40v40H0zm40 40h40v40H40z'/%3E%3Cpath d='M0 40l20-20h20l20 20-20 20H20zM60 0l20 20v20L60 60V40L40 20V0z'/%3E%3Ccircle cx='70' cy='10' r='10'/%3E%3Ccircle cx='10' cy='70' r='10'/%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed;
+            background-size: 200px 200px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #33691e;
+            text-align: center;
+        }
+        .container p {
+            color: #33691e;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #33691e;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #aed581;
+            border-radius: 4px;
+            background-color: white;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #33691e;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1b1f5e;
+        }
+        #predictionResult {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-left: 5px solid #33691e;
+            display: none;
+            color: #33691e;
+        }
+        .error {
+            background-color: #ffebee;
+            border-left-color: #c62828;
+            color: #c62828;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            margin: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 5px;
+        }
+
+        .footer-section ul li a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .footer-section ul li a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            margin-top: 20px;
+            border-top: 1px solid #555;
+            padding-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <img src="/static/images/logo.png" alt="FarmsSphere Logo" class="navbar-logo-img">
+                <div class="navbar-logo">FarmsSphere</div>
+            </div>
+            <div class="navbar-links">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Crop Yield Prediction Tool</h1>
+        <p>This tool uses machine learning to predict crop yield based on various environmental and agricultural factors</p>
+        
+        <div class="input-group">
+            <label for="crop">Select Crop:</label>
+            <select id="crop" required>
+                <option value="">Select a crop</option>
+                <option value="Rice">Rice</option>
+                <option value="Maize">Maize</option>
+                <option value="Chickpea">Chickpea</option>
+                <option value="Kidney beans">Kidney beans</option>
+                <option value="Pigeon peas">Pigeon peas</option>
+                <option value="Moth beans">Moth beans</option>
+                <option value="Mung bean">Mung bean</option>
+                <option value="Black gram">Black gram</option>
+                <option value="Lentil">Lentil</option>
+                <option value="Pomegranate">Pomegranate</option>
+                <option value="Banana">Banana</option>
+                <option value="Mango">Mango</option>
+                <option value="Grapes">Grapes</option>
+                <option value="Watermelon">Watermelon</option>
+                <option value="Muskmelon">Muskmelon</option>
+                <option value="Apple">Apple</option>
+                <option value="Orange">Orange</option>
+                <option value="Papaya">Papaya</option>
+                <option value="Coconut">Coconut</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Jute">Jute</option>
+                <option value="Coffee">Coffee</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="area">Area (in hectares):</label>
+            <input type="number" id="area" placeholder="e.g., 10" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="rainfall">Rainfall (in mm):</label>
+            <input type="number" id="rainfall" placeholder="e.g., 1000" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="pesticide">Pesticide (kg/hectare):</label>
+            <input type="number" id="pesticide" placeholder="e.g., 0.5" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="soil_ph">Soil pH:</label>
+            <input type="number" id="soil_ph" placeholder="e.g., 6.5" step="0.1" min="0" max="14" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="fertilizer">Fertilizer (kg/hectare):</label>
+            <input type="number" id="fertilizer" placeholder="e.g., 100" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="temperature">Temperature (°C):</label>
+            <input type="number" id="temperature" placeholder="e.g., 25" required>
+        </div>
+        
+        <button onclick="predictYield()">Predict Yield</button>
+        
+        <div id="predictionResult"></div>
+    </div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>FarmsSphere is dedicated to empowering farmers with cutting-edge technology and data-driven insights.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="index.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: farmsphere28@gmail.com</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 FarmsSphere. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+    function predictYield() {
+        // Collect all form data
+        const formData = {
+            crop: document.getElementById('crop').value,
+            area: parseFloat(document.getElementById('area').value),
+            rainfall: parseFloat(document.getElementById('rainfall').value),
+            pesticide: parseFloat(document.getElementById('pesticide').value),
+            soil_ph: parseFloat(document.getElementById('soil_ph').value),
+            fertilizer: parseFloat(document.getElementById('fertilizer').value),
+            temperature: parseFloat(document.getElementById('temperature').value)
+        };
+
+        // Validate inputs
+        for (const [key, value] of Object.entries(formData)) {
+            if (!value && value !== 0) {
+                showError('Please fill in all fields');
+                return;
+            }
+            if (key !== 'crop' && (isNaN(value) || value < 0)) {
+                showError('Please enter valid positive numbers');
+                return;
+            }
+        }
+
+        // Special validation for soil pH
+        if (formData.soil_ph < 0 || formData.soil_ph > 14) {
+            showError('Soil pH must be between 0 and 14');
+            return;
+        }
+
+        fetch('/predict_yield', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('predictionResult');
+            resultDiv.classList.remove('error');
+            
+            if (data.error) {
+                showError(data.error);
+            } else {
+                resultDiv.textContent = `Predicted Yield: ${data.yield_prediction.toFixed(2)} tonnes/hectare`;
+                resultDiv.style.display = 'block';
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            showError('An error occurred. Please try again.');
+        });
+    }
+
+    function showError(message) {
+        const resultDiv = document.getElementById('predictionResult');
+        resultDiv.textContent = 'Error: ' + message;
+        resultDiv.classList.add('error');
+        resultDiv.style.display = 'block';
+    }
+    </script>
+</body>
+</html>

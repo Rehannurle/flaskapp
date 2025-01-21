@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainfall Prediction</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+         .navbar {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .navbar-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-logo-img {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .navbar-logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            display: inline-block;
+        }
+
+        .navbar-links {
+            display: flex;
+        }
+
+        .navbar-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s ease;
+        }
+
+        .navbar-links a:hover {
+            color: #3498db;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-section {
+            margin: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 10px;
+        }
+
+        .footer-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 5px;
+        }
+
+        .footer-section ul li a {
+            color: #ddd;
+            text-decoration: none;
+        }
+
+        .footer-section ul li a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            margin-top: 20px;
+            border-top: 1px solid #555;
+            padding-top: 10px;
+            font-size: 0.9em;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <img src="/static/images/logo.png" alt="FarmsSphere Logo" class="navbar-logo-img">
+                <div class="navbar-logo">FarmsSphere</div>
+            </div>
+            <div class="navbar-links">
+                <a href="#home">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="{{ url_for('profile') }}">Profile</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Rainfall Prediction</h1>
+            <div class="text-center">
+                <button id="getLocation" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center mx-auto">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    Get My Location
+                </button>
+                <div id="error" class="hidden mt-4 p-4 bg-red-100 text-red-700 rounded-lg"></div>
+            </div>
+        </div>
+
+        <!-- Weather Info Container (Hidden by default) -->
+        <div id="weatherInfo" class="hidden space-y-8">
+            <!-- Current Weather -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4">Current Weather</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-gray-500">Rain Probability</p>
+                                <p id="currentRainProb" class="font-semibold">-</p>
+                            </div>
+                        </div>
+                        <p id="currentPrediction" class="mt-2 text-sm">-</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-gray-500">Temperature</p>
+                                <p id="currentTemp" class="font-semibold">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-gray-500">Wind Speed</p>
+                                <p id="currentWind" class="font-semibold">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5-Day Forecast -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4">5-Day Forecast</h2>
+                <div id="forecast" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Forecast cards will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Rain Probability Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-blue-700 mb-4">Rain Probability Chart</h2>
+                <div class="h-64">
+                    <canvas id="rainChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>FarmsSphere is dedicated to empowering farmers with cutting-edge technology and data-driven insights.
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="\home.html">Home</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="\contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email:farmsphere28@gmail.com</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 FarmsSphere. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const getLocationBtn = document.getElementById('getLocation');
+            const errorDiv = document.getElementById('error');
+            const weatherInfo = document.getElementById('weatherInfo');
+            let rainChart = null;
+
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorDiv.classList.add('hidden');
+            }
+
+            function updateCurrentWeather(current) {
+                document.getElementById('currentRainProb').textContent = `${(parseFloat(current.probability) * 100).toFixed(1)}%`;
+                document.getElementById('currentPrediction').textContent = current.prediction;
+                document.getElementById('currentTemp').textContent = `${current.temperature}°C`;
+                document.getElementById('currentWind').textContent = `${current.wind_speed} m/s`;
+            }
+
+            function createForecastCard(day) {
+                const date = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
+                return `
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <div class="flex flex-col items-center">
+                            <p class="font-semibold">${date}</p>
+                            <p class="text-sm text-gray-500">${day.temperature}°C</p>
+                            <div class="flex items-center mt-2">
+                                <svg class="w-4 h-4 text-blue-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                                </svg>
+                                <span class="text-sm">${(parseFloat(day.probability) * 100).toFixed(1)}%</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2 text-center">${day.description}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function updateForecast(forecast) {
+                const forecastContainer = document.getElementById('forecast');
+                forecastContainer.innerHTML = forecast.map(day => createForecastCard(day)).join('');
+            }
+
+            function updateRainChart(forecast) {
+                const ctx = document.getElementById('rainChart').getContext('2d');
+                
+                if (rainChart) {
+                    rainChart.destroy();
+                }
+
+                const labels = forecast.map(day => new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }));
+                const data = forecast.map(day => parseFloat(day.probability) * 100);
+
+                rainChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Rain Probability (%)',
+                            data: data,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+
+            async function fetchWeatherData(latitude, longitude) {
+                try {
+                    const response = await fetch(`/predict_rain?lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    weatherInfo.classList.remove('hidden');
+                    updateCurrentWeather(data.current);
+                    updateForecast(data.forecast);
+                    updateRainChart(data.forecast);
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+
+            getLocationBtn.addEventListener('click', function() {
+                hideError();
+                
+                if (navigator.geolocation) {
+                    getLocationBtn.disabled = true;
+                    getLocationBtn.textContent = 'Getting Location...';
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            try {
+                                await fetchWeatherData(
+                                    position.coords.latitude,
+                                    position.coords.longitude
+                                );
+                            } catch (err) {
+                                showError(err.message);
+                            } finally {
+                                getLocationBtn.disabled = false;
+                                getLocationBtn.innerHTML = `
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Get My Location
+                                `;
+                            }
+                        },
+                        (err) => {
+                            showError('Unable to get location. Please enable location services.');
+                            getLocationBtn.disabled = false;
+                            getLocationBtn.innerHTML = `
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Get My Location
+                            `;
+                        }
+                    );
+                } else {
+                    showError('Geolocation is not supported by your browser');
+                }
+            });
+        });
+    </script>
+</body> 
+</html>

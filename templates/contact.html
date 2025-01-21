@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - FarmsSphere</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Layout */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            /* background-color: transparent; */
+            backdrop-filter: blur(30px);
+            color: white;
+            padding: 1rem 0;
+            transition: background-color 0.3s ease;
+            z-index: 1000;
+        }
+        .navbar.scrolled {
+            background-color: rgba(16, 35, 78, 0.9); /* Semi-transparent green */
+        }
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .navbar-links a {
+            margin-left: 1rem;
+        }
+        .navbar-links a:hover {
+            color: #bbf7d0;
+        }
+
+        /* Main content */
+        main {
+            flex-grow: 1;
+            padding: 5rem 0 2rem; /* Increased top padding to account for fixed navbar */
+        }
+        h1 {
+            font-size: 2rem;
+            color: #16a34a;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Contact form */
+        .contact-form {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 10px rgba(0, 0, 0, 0.318);
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+        }
+        button {
+            background-color: #0d404d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #15803d;
+        }
+
+        /* Contact info */
+        .contact-info {
+            background-color: #ccf0d9;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+        }
+        .contact-info h2 {
+            font-size: 1.5rem;
+            color: #16a34a;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #0d404d;
+            color: white;
+            padding: 2rem 0 0;
+            margin-top: auto;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .footer-content {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .footer h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .footer-bottom {
+            background-color: #0d404d;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+
+        /* Hero section for background image */
+        .hero {
+            background-image: url('/static/images/contact-us.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <div class="navbar-logo">
+                FarmsSphere
+            </div>
+            <div class="navbar-links">
+                <a href="index.html">Home</a>
+                <a href="index.html">Services</a>
+                <a href="contact.html">Contact</a>
+                <a href="about.html">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <!-- <h1>Contact Us</h1> -->
+    </div>
+
+    <main class="container">
+        <div class="contact-grid">
+            <div class="contact-form">
+                <form>
+                    <div class="form-group">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <textarea id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    <button type="submit">Send Message</button>
+                </form>
+            </div>
+            
+            <div class="contact-info">
+                <h2>Get in Touch</h2>
+                <p>If you prefer to contact us directly, you can reach us at:</p>
+                <p><strong>Email:</strong> farmsphere28@gmail.com</p>
+                <p><strong>Phone:</strong> (123) 456-7890</p>
+                <p><strong>Address:</strong> 123 Farm Road, Agritown, AG 12345</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div>
+                <h3>About Us</h3>
+                <p>FarmsSphere is dedicated to empowering farmers with cutting-edge technology and data-driven insights.</p>
+            </div>
+            <div>
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3>Contact Us</h3>
+                <p>Email: farmsphere28@gmail.com</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                © 2024 FarmsSphere. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript for sticky navbar effect
+        window.addEventListener('scroll', function() {
+            var navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
