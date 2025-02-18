@@ -20,7 +20,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import re
-
+#try something new 
+from flask import send_file, abort
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = 'd0b5f9ce92a00bdfd55390bdd649806d2b1ae251d08fc64212738ec1b3de443a'
@@ -751,6 +752,23 @@ def internal_error(error):
 def init_db():
     with app.app_context():
         db.create_all()
+
+
+
+# Add this route to your app.py file
+@app.route('/download_db_temporary/<secret_key>')
+def download_db(secret_key):
+    # Use a strong, random secret key as protection
+    if secret_key != 'f7a8b9c1d2e3f4g5h6i7j8k9l0m1n2o3p4q5r6s7t8u9v0w1x2y3z4a5b6c7d8':
+        return abort(404)  # Return 404 to hide that this endpoint exists
+    
+    db_path = 'users.db'  # or 'instance/users.db' if it's in the instance folder
+    if os.path.exists(db_path):
+        return send_file(db_path, 
+                       as_attachment=True,
+                       download_name='users_backup.db')
+    else:
+        return f"Database file not found at {db_path}", 404
 
 if __name__ == '__main__':
     init_db()  # Initialize database tables
