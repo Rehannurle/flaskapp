@@ -762,7 +762,7 @@ def download_db(secret_key):
     if secret_key != 'f7a8b9c1d2e3f4g5h6i7j8k9l0m1n2o3p4q5r6s7t8u9v0w1x2y3z4a5b6c7d8':
         return abort(404)  # Return 404 to hide that this endpoint exists
     
-    db_path = 'users.db'  # or 'instance/users.db' if it's in the instance folder
+    db_path = 'instance/users.db'  # or 'instance/users.db' if it's in the instance folder
     if os.path.exists(db_path):
         return send_file(db_path, 
                        as_attachment=True,
