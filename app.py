@@ -769,7 +769,54 @@ def download_db(secret_key):
                        download_name='users_backup.db')
     else:
         return f"Database file not found at {db_path}", 404
+# Add these routes to your app.py
 
+@app.route('/admin_dashboard')
+@login_required
+def admin_dashboard():
+    # Check if user is admin (you can modify this check based on your needs)
+    if current_user.username != 'admin':  # Simple check for admin user
+        flash('Access denied. Admin privileges required.')
+        return redirect(url_for('index'))
+    
+    # Get all users from the database
+    users = User.query.all()
+    return render_template('admin_dashboard.html', users=users)
+
+
+from flask import make_response
+import io
+
+@app.route('/download_users_csv')
+@login_required
+def download_users_csv():
+    # Check if user is admin
+    if current_user.username != 'admin':
+        flash('Access denied. Admin privileges required.')
+        return redirect(url_for('index'))
+
+    # Get all users from the database
+    users = User.query.all()
+
+    # Create a CSV file in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write the header
+    writer.writerow(['ID', 'Username', 'Email', 'Created At', 'Predictions Count', 'Recommendations Count'])
+
+    # Write user data
+    for user in users:
+        writer.writerow([user.id, user.username, user.email, user.created_at.strftime('%Y-%m-%d %H:%M:%S'), user.predictions_count, user.recommendations_count])
+
+    # Create a response with the CSV file
+    output.seek(0)
+    response = make_response(output.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=users.csv'
+    response.headers['Content-type'] = 'text/csv'
+
+    return response
+    
 if __name__ == '__main__':
     init_db()  # Initialize database tables
     app.run(debug=True)
