@@ -167,6 +167,9 @@
                 <a href="#about">About</a>
                 <a href="#contact">Contact</a>
                 <a href="{{ url_for('profile') }}">Profile</a>
+                 {% if current_user.username == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="admin-link">Dashboard</a>
+                {% endif %}
             </div>
         </div>
     </nav>
